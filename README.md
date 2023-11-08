@@ -9,5 +9,5 @@ yarn install
 
 ### Running the backend
 ```
-yarn start or npm start
+yarn start
 ```
