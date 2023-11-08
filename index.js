@@ -25,19 +25,30 @@ const redisClient = redis.createClient(6379, '127.0.0.1');
   await redisClient.connect();
 })();
 
-redisClient.on('connect', () => {
-  console.log('REDIS Connected!');
+// redisClient.on('connect', () => {
+//   console.log('REDIS Connected!');
 
-  const io = new Server(httpServer, {
-    cors: {
-      origin: 'http://localhost:4000',
-      methods: ['GET', 'POST'],
-    },
-  });
+//   const io = new Server(httpServer, {
+//     cors: {
+//       origin: 'http://localhost:4000',
+//       methods: ['GET', 'POST'],
+//     },
+//   });
 
-  io.on('connection', (socket) => {
-    handleUserConnect(socket, io, redisClient);
-  });
+//   io.on('connection', (socket) => {
+//     handleUserConnect(socket, io, redisClient);
+//   });
+// });
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: 'http://localhost:4000',
+    methods: ['GET', 'POST'],
+  },
+});
+
+io.on('connection', (socket) => {
+  handleUserConnect(socket, io, redisClient);
 });
 
 // check session id
