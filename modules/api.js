@@ -14,7 +14,8 @@ const database = {
         id: '',
         title: '',
         body: '',
-        voted: true,
+        votingInProgress: false,
+        finishedVoting: false,
         votes: [
           {
             userId: '',
@@ -78,7 +79,7 @@ const handleUserConnect = (socket) => {
   socket.join(room);
 
   // update sessionName (if it didn't exist yet)
-  if (!database[room].sessionName && sessionName) {
+  if (!database[room].sessionName && sessionName && sessionName.length) {
     database[room].sessionName = sessionName;
   }
 
@@ -142,9 +143,43 @@ const handleUserConnect = (socket) => {
     socket.nsp.to(room).emit('updateSession', database[room]);
   });
 
+  // **EVENT** update voting issue status
+  socket.on('updateVotingIssueStatus', ({ issueId, started, stopped }) => {
+    const issueIndex = database[room].issues.findIndex((issue) => issue.number === issueId);
+
+    if (issueIndex >= 0) {
+      if (started) {
+        database[room].issues[issueIndex].votingInProgress = true;
+      } else if (stopped) {
+        database[room].issues[issueIndex].votingInProgress = false;
+        // database[room].issues[issueIndex].finishedVoting = true;
+      }
+    }
+
+    // update session on all clients
+    socket.nsp.to(room).emit('updateSession', database[room]);
+  });
+
   // **EVENT** voting
-  socket.on('castVoteOnIssue', (vote) => {
-    console.log('vote cast!', vote);
+  socket.on('castVoteOnIssue', ({ issueId, vote }) => {
+    const issueIndex = database[room].issues.findIndex((issue) => issue.number === issueId);
+
+    if (issueIndex >= 0) {
+      const userVoteIndex = database[room].issues[issueIndex].votes
+        .findIndex((v) => v.userId === userId);
+
+      if (userVoteIndex >= 0) {
+        database[room].issues[issueIndex].votes[userVoteIndex].vote = vote;
+      } else {
+        database[room].issues[issueIndex].votes.push({
+          userId,
+          vote,
+        });
+      }
+    }
+
+    // update session on all clients
+    socket.nsp.to(room).emit('updateSession', database[room]);
   });
 };
 
