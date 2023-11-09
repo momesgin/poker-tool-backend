@@ -15,7 +15,7 @@ const database = {
         title: '',
         body: '',
         votingInProgress: false,
-        finishedVoting: false,
+        finishedUserVoting: false,
         votes: [
           {
             userId: '',
@@ -135,6 +135,14 @@ const handleUserConnect = (socket) => {
     });
   });
 
+  // **EVENT** update session name
+  socket.on('updateSessionName', (newSessionName) => {
+    database[room].sessionName = newSessionName;
+
+    // update session on all clients
+    socket.nsp.to(room).emit('updateSession', database[room]);
+  });
+
   // **EVENT** update issues list
   socket.on('updateIssuesList', (issues) => {
     database[room].issues = issues;
@@ -152,7 +160,7 @@ const handleUserConnect = (socket) => {
         database[room].issues[issueIndex].votingInProgress = true;
       } else if (stopped) {
         database[room].issues[issueIndex].votingInProgress = false;
-        // database[room].issues[issueIndex].finishedVoting = true;
+        database[room].issues[issueIndex].finishedUserVoting = true;
       }
     }
 
@@ -160,7 +168,7 @@ const handleUserConnect = (socket) => {
     socket.nsp.to(room).emit('updateSession', database[room]);
   });
 
-  // **EVENT** voting
+  // **EVENT** users voting on issue
   socket.on('castVoteOnIssue', ({ issueId, vote }) => {
     const issueIndex = database[room].issues.findIndex((issue) => issue.number === issueId);
 
@@ -176,6 +184,18 @@ const handleUserConnect = (socket) => {
           vote,
         });
       }
+    }
+
+    // update session on all clients
+    socket.nsp.to(room).emit('updateSession', database[room]);
+  });
+
+  // **EVENT** final admin vote
+  socket.on('finalizeVoting', ({ issueId, vote }) => {
+    const issueIndex = database[room].issues.findIndex((issue) => issue.number === issueId);
+
+    if (issueIndex >= 0) {
+      database[room].issues[issueIndex].finalVote = vote;
     }
 
     // update session on all clients
