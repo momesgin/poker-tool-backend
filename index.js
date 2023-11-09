@@ -51,7 +51,7 @@ const httpServer = createServer(app);
 // init socketio
 const io = new Server(httpServer, {
   cors: {
-    origin,
+    origin: '*',
     methods: ['GET', 'POST'],
   },
 });
