@@ -10,7 +10,7 @@ const { handleUserConnect, checkRoom } = require('./modules/api');
 let origin;
 
 if (process.env.NODE_ENV === 'production') {
-  origin = process.env.ORIGIN_URL;
+  origin = 'http://146.190.150.213:80';
 } else {
   origin = 'http://localhost:4000';
 }
