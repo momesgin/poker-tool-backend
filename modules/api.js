@@ -19,7 +19,11 @@ const database = {
         votes: [
           {
             userId: '',
-            vote: '',
+            vote: {
+              label: '&#189;',
+              value: 0.5,
+              deterministic: true,
+            },
           },
         ],
       },
@@ -35,7 +39,7 @@ function disconnectFromRoom({ socket, socketId, room }) {
     database[room].users.splice(index, 1);
   }
 
-  console.log(`Users database after disconnect ${database[room].users}`);
+  console.log(`Users database after disconnect ${database[room].users}`); // eslint-disable-line no-console
 
   // update session on all clients
   socket.nsp.to(room).emit('updateSession', database[room]);
@@ -65,7 +69,7 @@ const handleUserConnect = (socket) => {
   const { room } = socket.handshake.query;
   const { sessionName } = socket.handshake.query;
 
-  console.log(`User ${username} with userId ${userId} connected on room ${room} with name ${sessionName} with socket id ${id}`);
+  console.log(`User ${username} with userId ${userId} connected on room ${room} with name ${sessionName} with socket id ${id}`); // eslint-disable-line no-console
 
   if (!database[room]) {
     database[room] = {
@@ -105,7 +109,7 @@ const handleUserConnect = (socket) => {
 
   // **EVENT** disconnect
   socket.on('disconnect', (reason) => {
-    console.log(`User ${username} disconnected on room ${room}: ${reason}`);
+    console.log(`User ${username} disconnected on room ${room}: ${reason}`); // eslint-disable-line no-console
   });
 
   // **EVENT** event to trigger disconnect from room
@@ -121,7 +125,7 @@ const handleUserConnect = (socket) => {
   socket.on('leaveRoom', (socketId) => {
     // if it's the same socket leaving, do socket.leave
     if (socketId === id) {
-      console.log(`User ${username} left the room ${room}`);
+      console.log(`User ${username} left the room ${room}`); // eslint-disable-line no-console
       socket.leave(room);
     }
   });
