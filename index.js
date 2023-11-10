@@ -43,7 +43,7 @@ const httpServer = createServer(app);
 // init socketio
 const io = new Server(httpServer, {
   cors: {
-    origin: 'http://localhost:4000',
+    origin: '*',
     methods: ['GET', 'POST'],
   },
 });
@@ -53,10 +53,12 @@ io.on('connection', (socket) => {
 });
 
 // check session id
-app.post('/checkRoom', (req, res) => {
+app.post('/api/checkRoom', (req, res) => {
   const { room } = req.body;
   const session = checkRoom(room);
   res.send(session);
 });
 
-httpServer.listen(8080);
+httpServer.listen(8080, () => {
+  console.log('Server is running...');
+});
