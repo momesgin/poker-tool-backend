@@ -205,6 +205,33 @@ const handleUserConnect = (socket) => {
     // update session on all clients
     socket.nsp.to(room).emit('updateSession', database[room]);
   });
+
+  // **EVENT** reset issue
+  socket.on('resetIssue', ({ issueId }) => {
+    const issueIndex = database[room].issues.findIndex((issue) => issue.number === issueId);
+
+    if (issueIndex >= 0) {
+      delete database[room].issues[issueIndex].finalVote;
+      delete database[room].issues[issueIndex].votingInProgress;
+      delete database[room].issues[issueIndex].finishedUserVoting;
+      database[room].issues[issueIndex].votes = [];
+    }
+
+    // update session on all clients
+    socket.nsp.to(room).emit('updateSession', database[room]);
+  });
+
+  // **EVENT** make user an admin
+  socket.on('makeAdmin', ({ user }) => {
+    const userIndex = database[room].users.findIndex((u) => u.userId === user.userId);
+
+    if (userIndex >= 0) {
+      database[room].users[userIndex].role = 'admin';
+    }
+
+    // update session on all clients
+    socket.nsp.to(room).emit('updateSession', database[room]);
+  });
 };
 
 module.exports = { handleUserConnect, checkRoom };
